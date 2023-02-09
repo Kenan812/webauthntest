@@ -1,20 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { coerceToBase64Url, coerceToArrayBuffer, showErrorAlert, PublicKeyCredentialWithAttestationJSON, convert } from 'src/app/utilities/helper';
 import { HttpClient } from '@angular/common/http';
 import { AuthenticatorAttestationResponse } from 'src/app/models/AuthenticatorAttestationRawResponse';
-import { Base64urlString, base64urlToBuffer } from 'src/app/utilities/Base64urlString';
 import { bufferToBase64url } from 'src/app/utilities/Base64urlString';
 import { publicKeyCredentialWithAttestation } from 'src/app/utilities/scema';
-import { RP } from 'src/app/models/RP';
-import { FidoUser } from 'src/app/models/FidoUser';
-import base64url from 'base64url';
-import { create } from '@github/webauthn-json';
-import { ClientDataObj } from 'src/app/models/client-data-obj';
-import { DecodedAttestionObj } from 'src/app/models/decoded-attestion-obj';
-
 
 @Component({
   selector: 'app-register',
@@ -50,8 +39,6 @@ export class RegisterComponent implements OnInit {
       let msg = "Something wen't really wrong";
       console.log(msg);
     }
-
-    // console.log("Make credential", makeCredentialOptions);
 
     const authenticatorSelection: AuthenticatorSelectionCriteria = {};
     authenticatorSelection.residentKey = "required";
@@ -103,8 +90,6 @@ export class RegisterComponent implements OnInit {
     makeCredentialOptions?.subscribe(
       (response: any) => { 
         let obj = response['result']['result']['response']
-        // console.log(obj)
-        // console.log("dnoqdiwndiwoqndoiqndoinqwidnwoqdnk")
         authenticatorSelection.authenticatorAttachment = obj.authenticatorSelection.authenticatorAttachment;
         authenticatorSelection.userVerification = obj.authenticatorSelection.userVerification;
 
@@ -112,16 +97,10 @@ export class RegisterComponent implements OnInit {
         user.displayName = obj.user.displayName;
         user.name = obj.user.name;
         
-        // obj.challeng = is base64url string
         decodedOptions.challenge = coerceToArrayBuffer(obj.challenge, "challenge");
-        // decodedOptions.challenge = obj.challenge
         decodedOptions.user = user;
         decodedOptions.authenticatorSelection = authenticatorSelection
         originalDecodedOptions.challenge = obj.challenge
-        // console.log("Original Challenge: ")
-        // console.log(obj.challenge)
-        // console.log("Decoded Options's Challenge: ")
-        // console.log(decodedOptions.challenge)
       },
     );
 
@@ -133,21 +112,7 @@ export class RegisterComponent implements OnInit {
     // ////////////////////////////////////////////////////////////////////////////////
 
 
-    // console.log("Credentials Original: ")
-    // console.log(credential)
-    // console.log(credential.response.clientDataJSON)
     let fsdf =  this.createResponseToJSON(credential);
-    // console.log("Credential modified: " )
-    // console.log(fsdf)
-    //let clientData = JSON.parse(base64url.decode( fsdf.response.clientDataJSON));
-    //console.log(clientData)
-    //create(parseCreationOptionsFromJSON())
-
-    const utf8Decoder = new TextDecoder('utf-8');
-    const decodedClientData = utf8Decoder.decode(credential.response.clientDataJSON);
-
-    const clientDataObj: ClientDataObj = JSON.parse(decodedClientData);
-    // console.log('clientDataObj', clientDataObj);
 
 
     let response;

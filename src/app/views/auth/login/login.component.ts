@@ -3,14 +3,10 @@ import { Router } from '@angular/router';
 import { coerceToBase64Url, coerceToArrayBuffer, showErrorAlert, PublicKeyCredentialWithAttestationJSON, convert } from 'src/app/utilities/helper';
 import { HttpClient } from '@angular/common/http';
 import { bufferToBase64url } from 'src/app/utilities/Base64urlString';
-// import { create, get, PublicKeyCredentialWithAssertionJSON } from '@github/webauthn-json';
-import { ClientDataObj } from 'src/app/models/client-data-obj';
 import { AuthenticationPublicKeyCredential } from '@github/webauthn-json/dist/types/browser-ponyfill.extended';
 import { PublicKeyCredentialWithAssertionJSON } from '@github/webauthn-json/dist/types/basic/json';
 import { publicKeyCredentialWithAssertion } from 'src/app/utilities/scema';
 import { AuthenticationResponseJSON } from '@github/webauthn-json/dist/types/browser-ponyfill';
-// import { AuthenticationPublicKeyCredential, AuthenticationResponseJSON } from '@github/webauthn-json/dist/types/browser-ponyfill';
-// import { publicKeyCredentialWithAssertion } from '@github/webauthn-json/dist/types/basic/schema';
 
 @Component({
   selector: 'app-login',
@@ -27,7 +23,6 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    // private authService: AuthService,
     private router: Router
   ) { 
     this.errorMessage = '';
@@ -99,7 +94,6 @@ export class LoginComponent implements OnInit {
 
       username = "6TF5HND"
       makeAssertionOptions = await this.makeAssertionOption(username);
-      // console.log(makeAssertionOptions)
     } catch (e) {
       console.error(e);
       let msg = "Something wen't really wrong";
@@ -113,16 +107,9 @@ export class LoginComponent implements OnInit {
         let obj = response['result']['result']['response']
         // console.log(obj)
 
-        // obj.challeng = is base64url string
         decodedOptions.challenge = coerceToArrayBuffer(obj.challenge, "challenge");
-        // decodedOptions.challenge = obj.challenge
         decodedOptions.user = user;
         decodedOptions.authenticatorSelection = authenticatorSelection
-        // console.log("Original Object: ")
-        // console.log(obj.rpId)
-        // console.log("Decoded Options's Challenge: ")
-        // console.log(decodedOptions.challenge)
-        // console.log("I am here")
         if (originalOptions.publicKey !== undefined) {
           originalOptions.publicKey.challenge = coerceToArrayBuffer(obj.challenge, "dsd");
           originalOptions.publicKey.allowCredentials = obj.allowCredentials;
@@ -140,27 +127,12 @@ export class LoginComponent implements OnInit {
   
     await new Promise(f => setTimeout(f, 4000));
 
-    // console.log(decodedOptions)
-    // ////////////////////////////////////////////////////////////////////////////////
     const credential = await navigator.credentials.get(  {
       publicKey: decodedOptions
     }) as AuthenticationPublicKeyCredential;
-    // ////////////////////////////////////////////////////////////////////////////////
 
 
-    // console.log("Credentials Original: ")
-    // console.log(credential)
-    // console.log(credential.response.clientDataJSON)
     let fsdf =  this.getResponseToJSON(credential);
-    // console.log("Credential modified: " )
-    // console.log(fsdf)
-
-
-    const utf8Decoder = new TextDecoder('utf-8');
-    const decodedClientData = utf8Decoder.decode(credential.response.clientDataJSON);
-
-    const clientDataObj: ClientDataObj = JSON.parse(decodedClientData);
-    // console.log('clientDataObj', clientDataObj);
 
 
     let response;
@@ -212,12 +184,8 @@ export class LoginComponent implements OnInit {
       }
     }
 
-    // console.log("dsdmqiwdjwqiodnwuidiudwuidwqpduwhqdiowudoqw")
-    // console.log(originalOptions.publicKey?.rpId)
-
     return this.http.post<any>('https://localhost:44396/api/Account/make-assertion', { 
       "ClientResponse" :asser,
-      // "options" : originalOptions
       "options" : {
         "allowCredentials" : originalOptions.publicKey?.allowCredentials,
         "rpId" : originalOptions.publicKey?.rpId,
