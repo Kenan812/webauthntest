@@ -92,7 +92,6 @@ export class LoginComponent implements OnInit {
     let makeAssertionOptions;
     try {
 
-      username = "6TF5HND"
       makeAssertionOptions = await this.makeAssertionOption(username);
     } catch (e) {
       console.error(e);
