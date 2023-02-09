@@ -5,12 +5,16 @@ import { Router } from '@angular/router';
 import { coerceToBase64Url, coerceToArrayBuffer, showErrorAlert, PublicKeyCredentialWithAttestationJSON, convert } from 'src/app/utilities/helper';
 import { HttpClient } from '@angular/common/http';
 import { AuthenticatorAttestationResponse } from 'src/app/models/AuthenticatorAttestationRawResponse';
-import { Base64urlString } from 'src/app/utilities/Base64urlString';
+import { Base64urlString, base64urlToBuffer } from 'src/app/utilities/Base64urlString';
 import { bufferToBase64url } from 'src/app/utilities/Base64urlString';
 import { publicKeyCredentialWithAttestation } from 'src/app/utilities/scema';
 import { RP } from 'src/app/models/RP';
 import { FidoUser } from 'src/app/models/FidoUser';
 import base64url from 'base64url';
+import { create } from '@github/webauthn-json';
+import { ClientDataObj } from 'src/app/models/client-data-obj';
+import { DecodedAttestionObj } from 'src/app/models/decoded-attestion-obj';
+
 
 @Component({
   selector: 'app-register',
@@ -32,7 +36,7 @@ export class RegisterComponent implements OnInit {
 
 
   handleRegisterSubmit = async () => {
-
+    
     var data = new FormData();
     data.append('userId', '57d9ff83-7747-48a6-ae33-7cf260b51cb4');
 
@@ -47,7 +51,7 @@ export class RegisterComponent implements OnInit {
       console.log(msg);
     }
 
-    console.log("Make credential", makeCredentialOptions);
+    // console.log("Make credential", makeCredentialOptions);
 
     const authenticatorSelection: AuthenticatorSelectionCriteria = {};
     authenticatorSelection.residentKey = "required";
@@ -99,41 +103,51 @@ export class RegisterComponent implements OnInit {
     makeCredentialOptions?.subscribe(
       (response: any) => { 
         let obj = response['result']['result']['response']
-        console.log(obj)
-        
+        // console.log(obj)
+        // console.log("dnoqdiwndiwoqndoiqndoinqwidnwoqdnk")
         authenticatorSelection.authenticatorAttachment = obj.authenticatorSelection.authenticatorAttachment;
         authenticatorSelection.userVerification = obj.authenticatorSelection.userVerification;
 
-        user.id = obj.user.id;
+        user.id = coerceToArrayBuffer(obj.user.id, "id");
         user.displayName = obj.user.displayName;
         user.name = obj.user.name;
-
-        decodedOptions.challenge = coerceToArrayBuffer(obj.challenge, "challenge")
+        
+        // obj.challeng = is base64url string
+        decodedOptions.challenge = coerceToArrayBuffer(obj.challenge, "challenge");
+        // decodedOptions.challenge = obj.challenge
         decodedOptions.user = user;
         decodedOptions.authenticatorSelection = authenticatorSelection
-        originalDecodedOptions.challenge = coerceToBase64Url(coerceToArrayBuffer(obj.challenge, "challenge"))
-        console.log("Original Challenge: ")
-        console.log(obj.challenge)
-        console.log("Original Challenge: ")
-        console.log(originalDecodedOptions.challenge)
+        originalDecodedOptions.challenge = obj.challenge
+        // console.log("Original Challenge: ")
+        // console.log(obj.challenge)
+        // console.log("Decoded Options's Challenge: ")
+        // console.log(decodedOptions.challenge)
       },
     );
 
-   
+   await new Promise(f => setTimeout(f, 5000));
     // ////////////////////////////////////////////////////////////////////////////////
-    const credential = await navigator.credentials.create({
+    const credential = await navigator.credentials.create(  {
       publicKey: decodedOptions
     }) as PublicKeyCredential;
     // ////////////////////////////////////////////////////////////////////////////////
 
 
-    console.log("Credentials Original: ")
-    console.log(credential)
+    // console.log("Credentials Original: ")
+    // console.log(credential)
+    // console.log(credential.response.clientDataJSON)
     let fsdf =  this.createResponseToJSON(credential);
-    console.log("Credential modified: " )
-    console.log(fsdf)
-    let clientData = JSON.parse(base64url.decode( fsdf.response.clientDataJSON));
-    console.log(clientData)
+    // console.log("Credential modified: " )
+    // console.log(fsdf)
+    //let clientData = JSON.parse(base64url.decode( fsdf.response.clientDataJSON));
+    //console.log(clientData)
+    //create(parseCreationOptionsFromJSON())
+
+    const utf8Decoder = new TextDecoder('utf-8');
+    const decodedClientData = utf8Decoder.decode(credential.response.clientDataJSON);
+
+    const clientDataObj: ClientDataObj = JSON.parse(decodedClientData);
+    // console.log('clientDataObj', clientDataObj);
 
 
     let response;
@@ -149,7 +163,7 @@ export class RegisterComponent implements OnInit {
         console.log(response)
       },
     );
-  
+
   };
 
   makeCredentialsOption = async(id: string) => {
@@ -157,6 +171,7 @@ export class RegisterComponent implements OnInit {
   }
 
   makeCredentials = async(credential : PublicKeyCredentialWithAttestationJSON, decodedOptions : PublicKeyCredentialCreationOptions, originalDecodedOptions : PublicKeyCredentialCreationOptions) => {
+
 
     const authentificatorResponse : AuthenticatorAttestationResponse = {
       Id: credential.id.toString(),
@@ -175,7 +190,7 @@ export class RegisterComponent implements OnInit {
           "Name": decodedOptions.rp.name
         },
         "user" : {
-          "Id": decodedOptions.user.id,
+          "Id": coerceToBase64Url(decodedOptions.user.id),
           "Name": decodedOptions.user.name,
           "DisplayName": decodedOptions.user.displayName
         },
@@ -196,3 +211,4 @@ export class RegisterComponent implements OnInit {
     );
   }
 }
+

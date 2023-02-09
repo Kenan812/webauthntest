@@ -7,18 +7,18 @@ import { Schema, SchemaProperty } from "./schema-format";
 export function coerceToBase64Url (thing : any) {
     // Array or ArrayBuffer to Uint8Array
     if (Array.isArray(thing)) {
-      console.log("Here") 
+      // console.log("Here") 
       thing = Uint8Array.from(thing);
     }
   
     if (thing instanceof ArrayBuffer) {
-      console.log("Here") 
+      // console.log("Here") 
       thing = new Uint8Array(thing);
     }
   
     // Uint8Array to base64
     if (thing instanceof Uint8Array) {
-      console.log("Here") 
+      // console.log("Here") 
       var str = "";
         var len = thing.byteLength;
   
@@ -28,7 +28,7 @@ export function coerceToBase64Url (thing : any) {
         thing = window.btoa(str);
     }
   
-    console.log(thing);
+    // console.log(thing);
     if (typeof thing !== "string") {
         throw new Error("could not coerce to string");
     }
@@ -55,6 +55,8 @@ export function coerceToArrayBuffer (thing : any, name : any) {
       }
       thing = bytes;
   }
+
+  // console.log("HereereH")
 
   // Array to Uint8Array
   if (Array.isArray(thing)) {

@@ -105,9 +105,11 @@ export const publicKeyCredentialWithAssertion: Schema = {
   ),
 };
 
+
 export const schema: { [s: string]: Schema } = {
   credentialCreationOptions,
   publicKeyCredentialWithAttestation,
   credentialRequestOptions,
   publicKeyCredentialWithAssertion,
 };
+
